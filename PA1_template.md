@@ -40,9 +40,9 @@ rawdata<-tbl_df(read.csv(fullfile, stringsAsFactors=FALSE)) %>%
 
 
 ## What is mean total number of steps taken per day?
+Compute the total number of steps for each day, then find the mean and median of this total.
 
 ```r
-## Analysis of steps per day
 stepsPerDay<-rawdata %>%
         group_by(date) %>%
         summarize(totalSteps=sum(steps,na.rm=TRUE))
@@ -62,12 +62,18 @@ The median total number of steps for the sample is 10395.00.
 
 
 ## What is the average daily activity pattern?
+For each interval, represented as a POSIXct, determine the average number of steps. From this, find the interval with the highest number.
 
 ```r
-## Analysis of activity patterns
 activityPattern<-rawdata %>%
         group_by(hourMin) %>%
         summarize(averageSteps=mean(steps,na.rm=TRUE))
+
+topInterval<-filter(activityPattern,averageSteps==max(averageSteps))%>%
+        inner_join(rawdata,by="hourMin")%>%
+        select(interval,hourMin,averageSteps)%>%
+        distinct()
+
 
 ggplot(
         data=activityPattern, 
@@ -79,6 +85,8 @@ ggplot(
 
 ![plot of chunk ActivityPattern](figure/ActivityPattern-1.png) 
 
+### Top Interval
+The interval with the highest average steps across all days is 835 (08:35) with an average of 206.1698113 steps.
 
 ## Imputing missing values
 ### Quantify
@@ -126,7 +134,7 @@ The mean total steps, after removing missing values is 10766.19.
 The median total stpes, after removing missing values is 10766.19.
 
 ### Observations
-After imputing measurements for missing values, the average step per day has gone up slightly. The graph shows fewer low values and a tighter distribution near the mean.
+After imputing measurements for missing values, the average step per day has gone up slightly. The graph shows fewer low values, and a larger grouping around the mean. This strategy causes the mean and median to be the same.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -163,6 +171,9 @@ ggplot(
 ```
 
 ![plot of chunk WeekDifference](figure/WeekDifference-1.png) 
+
+### Observations
+There is a difference between weekdays and weekends. On weekdays, the activity starts earlier, but is lower in the middle of the day. The weekends have elevated activity across much of the day.
 
 ## Clean up files and directory.
 
