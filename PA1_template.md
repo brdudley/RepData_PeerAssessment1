@@ -9,7 +9,8 @@ This is an analysis of movement data from a wearable device. It looks at total n
 ## Loading and preprocessing the data
 The data come from a zip file assumed to be available in the working directory. The actual data file is extracted from the zip file and loaded. The date column is converted from a character field to a Date, and a new column is added representing the interval as a POSIXct time.
 
-```{r,CleanData, echo=TRUE,message=FALSE}
+
+```r
 ## Pull in needed packages
 suppressWarnings(require(dplyr))
 suppressWarnings(require(data.table))
@@ -35,12 +36,12 @@ unzip(zipfile=zipfile, files=targetfile, exdir=tempdir)
 rawdata<-tbl_df(read.csv(fullfile, stringsAsFactors=FALSE)) %>%
         mutate(date=as.Date(date,"%Y-%m-%d")) %>%
         mutate(hourMin=as.POSIXct(strptime(sprintf("%04d",interval),"%H%M")))
-
 ```
 
 
 ## What is mean total number of steps taken per day?
-```{r,StepsPerDay,echo=TRUE}
+
+```r
 ## Analysis of steps per day
 stepsPerDay<-rawdata %>%
         group_by(date) %>%
@@ -52,14 +53,17 @@ medianSteps<-sprintf("%7.2f",median(stepsPerDay$totalSteps,na.rm=TRUE))
 hist(stepsPerDay$totalSteps,breaks=10,col="red",main="Total Steps Per Day", xlab="Steps")
 ```
 
+![plot of chunk StepsPerDay](figure/StepsPerDay-1.png) 
 
-The mean total number of steps for the sample is `r averageSteps`.  
 
-The median total number of steps for the sample is `r medianSteps`.
+The mean total number of steps for the sample is 9354.23.  
+
+The median total number of steps for the sample is 10395.00.
 
 
 ## What is the average daily activity pattern?
-```{r,ActivityPattern,echo=TRUE}
+
+```r
 ## Analysis of activity patterns
 activityPattern<-rawdata %>%
         group_by(hourMin) %>%
@@ -71,32 +75,34 @@ ggplot(
         geom_line(col="blue",size=1)+theme_bw()+
         scale_x_datetime(breaks="4 hours", labels=date_format("%H%:%M"))+
         xlab("Day Interval")+ylab("Average Steps")+ggtitle("Daily Activity Pattern")
-
 ```
+
+![plot of chunk ActivityPattern](figure/ActivityPattern-1.png) 
 
 
 ## Imputing missing values
 ### Quantify
 There are a number of missing values for the step measurement. The first step is to quantify, then values will be assigned to them.
-```{r, MissingValues, echo=TRUE}
+
+```r
 missing.date<-sum(is.na(rawdata$date))
 missing.interval<-sum(is.na(rawdata$interval))
 missing.steps<-sum(is.na(rawdata$steps))
-
 ```
 
 Missing values for the data set:
 
-+       Date: `r missing.date`
++       Date: 0
 
-+       Interval: `r missing.interval`
++       Interval: 0
 
-+       Steps: `r missing.steps`
++       Steps: 2304
 
 ### Assign Values
 Use the average steps for each interval, computed above, to supply missing values and repeat
 the daily step total analysis to see how it changes.
-```{r, ImputeValues, echo=TRUE}
+
+```r
 imputeActivity<-rawdata %>%
         inner_join(activityPattern, by="hourMin") %>%
         mutate(imputedSteps=ifelse(is.na(steps),averageSteps,steps))
@@ -111,14 +117,13 @@ averageStepsImputed<-sprintf("%7.2f",mean(imputedStepsPerDay$totalSteps))
 medianStepsImputed<-sprintf("%7.2f",median(imputedStepsPerDay$totalSteps))
 
 hist(imputedStepsPerDay$totalSteps,breaks=10,col="green",main="Total Steps Per Day\nImputed values assigned", xlab="Steps")
-
-
-
 ```
 
-The mean total steps, after removing missing values is `r averageStepsImputed`.
+![plot of chunk ImputeValues](figure/ImputeValues-1.png) 
 
-The median total stpes, after removing missing values is `r medianStepsImputed`.
+The mean total steps, after removing missing values is 10766.19.
+
+The median total stpes, after removing missing values is 10766.19.
 
 ### Observations
 After imputing measurements for missing values, the average step per day has gone up slightly. The graph shows fewer low values and a tighter distribution near the mean.
@@ -130,7 +135,8 @@ Using the data set with imputed values, this analysis looks at the difference be
 ### Add a Factor
 First, a new factor variable is added to the data set to differentiate week days from weekend days.
 
-```{r, DayOfWeek, echo=TRUE}
+
+```r
 ## Add a factor variable to the data
 imputeActivity<-imputeActivity %>%
         mutate(weekPart=as.factor(
@@ -138,7 +144,8 @@ imputeActivity<-imputeActivity %>%
 ```
 
 ### Look at the results
-```{r, WeekDifference, echo=TRUE}
+
+```r
 ## Compute average steps by part of the week.
 weekPartPattern<-imputeActivity %>%
         group_by(weekPart,hourMin) %>%
@@ -153,12 +160,21 @@ ggplot(
         scale_x_datetime(breaks="4 hours", labels=date_format("%H%:%M"))+
         xlab("Day Interval")+ylab("Average Steps")+
         ggtitle("Daily Activity Pattern\nBy Part of the week")
-
 ```
 
+![plot of chunk WeekDifference](figure/WeekDifference-1.png) 
+
 ## Clean up files and directory.
-```{r TearDown, echo=TRUE}
+
+```r
 file.remove(fullfile)
+```
+
+```
+## [1] TRUE
+```
+
+```r
 unlink(tempdir)
 ```
 
