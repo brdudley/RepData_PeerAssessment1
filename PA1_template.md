@@ -100,11 +100,11 @@ missing.steps<-sum(is.na(rawdata$steps))
 
 Missing values for the data set:
 
-+       Date: 0
++ Date: 0
 
-+       Interval: 0
++ Interval: 0
 
-+       Steps: 2304
++ Steps: 2304
 
 ### Assign Values
 Use the average steps for each interval, computed above, to supply missing values and repeat
