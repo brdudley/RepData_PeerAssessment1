@@ -43,9 +43,9 @@ rawdata<-tbl_df(read.csv(fullfile, stringsAsFactors=FALSE)) %>%
 Compute the total number of steps for each day, then find the mean and median of this total.
 
 ```r
-stepsPerDay<-rawdata %>%
+stepsPerDay<-filter(rawdata, complete.cases(rawdata)) %>%
         group_by(date) %>%
-        summarize(totalSteps=sum(steps,na.rm=TRUE))
+        summarize(totalSteps=sum(steps))
 
 averageSteps<-sprintf("%7.2f",mean(stepsPerDay$totalSteps,na.rm=TRUE))
 medianSteps<-sprintf("%7.2f",median(stepsPerDay$totalSteps,na.rm=TRUE))
@@ -56,16 +56,16 @@ hist(stepsPerDay$totalSteps,breaks=10,col="red",main="Total Steps Per Day", xlab
 ![plot of chunk StepsPerDay](figure/StepsPerDay-1.png) 
 
 
-The mean total number of steps for the sample is 9354.23.  
+The mean total number of steps for the sample is 10766.19.  
 
-The median total number of steps for the sample is 10395.00.
+The median total number of steps for the sample is 10765.00.
 
 
 ## What is the average daily activity pattern?
 For each interval, represented as a POSIXct, determine the average number of steps. From this, find the interval with the highest number.
 
 ```r
-activityPattern<-rawdata %>%
+activityPattern<-filter(rawdata, complete.cases(rawdata)) %>%
         group_by(hourMin) %>%
         summarize(averageSteps=mean(steps,na.rm=TRUE))
 
@@ -134,7 +134,7 @@ The mean total steps, after removing missing values is 10766.19.
 The median total stpes, after removing missing values is 10766.19.
 
 ### Observations
-After imputing measurements for missing values, the average step per day has gone up slightly. The graph shows fewer low values, and a larger grouping around the mean. This strategy causes the mean and median to be the same.
+After imputing measurements for missing values, the average step per day has not changed. This strategy causes the mean and median to have the same value.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?

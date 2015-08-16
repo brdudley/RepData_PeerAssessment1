@@ -129,7 +129,7 @@ The mean total steps, after removing missing values is `r averageStepsImputed`.
 The median total stpes, after removing missing values is `r medianStepsImputed`.
 
 ### Observations
-After imputing measurements for missing values, the average step per day has not changed. This strategy causes the mean and median to be the same.
+After imputing measurements for missing values, the average step per day has not changed. This strategy causes the mean and median to have the same value.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
